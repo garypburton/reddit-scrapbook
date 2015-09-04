@@ -1,0 +1,24 @@
+<head>
+  	<title>redditscrapbook</title>
+</head>
+
+<body>
+	<h1>Welcome to the Reddit Scrapbook!</h1>
+	<form class="search">
+		<input type="text" name="sub" id="searchField" value="{{example}}">
+	</form>
+	{{>results}}
+		
+	
+</body>
+
+
+<template name="results">
+	<ul>
+		{{#each images}}
+	  	<li>
+	  		<img src="{{url}}" alt="">
+	  	</li>
+	  	{{/each}}
+  	</ul>
+</template>
