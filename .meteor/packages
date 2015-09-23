@@ -9,3 +9,5 @@ autopublish
 insecure
 http
 fourseven:scss
+mrt:jquery-imagesloaded
+sjors:meteor-masonry

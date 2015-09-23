@@ -3,6 +3,8 @@ if (Meteor.isClient) {
   var example = "pics";
   var subReddit = example;
 
+  
+
   Template.body.events = {
     'submit .search': function(event){
       event.preventDefault();
@@ -14,6 +16,7 @@ if (Meteor.isClient) {
         }else{
           console.log(resultsArray);
           Session.set("images", resultsArray);
+
         }
       });
       event.target.sub.value = "";
@@ -30,7 +33,29 @@ if (Meteor.isClient) {
     }
   });
 
+  Template.results.rendered = function(){
+    var $container = $('#resultsContainer');
+    $container.imagesLoaded(function(){
+      $container.masonry({
+        itemSelector: '.img-result'
+      });
+    });
+  };
+
 }
+
+// var imageCounter = 0;
+// function countImages() {
+//   if(++imageCounter == this.length) {
+//     // Do whatever you need
+//     var $container = $('#resultsContainer');
+//     $container.imagesLoaded(function(){
+//       $container.masonry({
+//         itemSelector: '.img-result'
+//       });
+//     });
+//   }
+// }
 
 if (Meteor.isServer) {
   Meteor.startup(function () {

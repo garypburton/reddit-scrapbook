@@ -1,0 +1,12 @@
+.img-results{
+	width: 100%;
+	.img-result{
+		float:left;
+		width: 25%;
+		img{
+			display: block;
+			width: 100%;
+			height: auto;
+		}
+	}
+}

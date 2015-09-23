@@ -14,11 +14,15 @@
 
 
 <template name="results">
-	<ul>
+	<ul id="resultsContainer" class="img-results">
 		{{#each images}}
-	  	<li>
-	  		<img src="{{url}}" alt="">
-	  	</li>
+	  		{{>image}}
 	  	{{/each}}
   	</ul>
+</template>
+	
+<template name="image">
+	<li class="img-result">
+  		<img src="{{url}}" alt="">
+  	</li>
 </template>
