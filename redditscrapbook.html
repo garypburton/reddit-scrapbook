@@ -19,10 +19,28 @@
 	  		{{>image}}
 	  	{{/each}}
   	</ul>
+  	<script>
+  		var iCount = 0;
+  		var $container = $('#resultsContainer');
+		function msnryTrigger() {
+			var mItems = document.getElementsByClassName('img-result');
+			console.log(mItems.length);
+			if(++iCount == mItems.length){
+				console.log('I have counted all image results and there are '+iCount);
+				$container.masonry({
+		        	itemSelector: '.img-result'
+		      	});
+			    $container.imagesLoaded(function(){
+			    	$container.masonry('reloadItems').masonry('layout');
+			    });
+				iCount = 0;
+			}
+		}
+  	</script>
 </template>
 	
 <template name="image">
 	<li class="img-result">
-  		<img src="{{url}}" alt="">
+  		<img src="{{url}}" alt="" onload="msnryTrigger()">
   	</li>
 </template>
