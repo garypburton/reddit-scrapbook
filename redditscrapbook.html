@@ -7,11 +7,25 @@
 	<form class="search">
 		<input type="text" name="sub" id="searchField" value="{{example}}">
 	</form>
+	{{>searches}}
 	{{>results}}
 		
 	
 </body>
 
+<template name="searches">
+	<ul  class="list-inline">
+		{{#each searches}}
+	  		{{>search}}
+	  	{{/each}}
+  	</ul>	
+</template>
+
+<template name="search">
+	<li >
+  		<a href="#" id="recentSearch">{{this}}</a>
+  	</li>
+</template>
 
 <template name="results">
 	<ul id="resultsContainer" class="img-results">

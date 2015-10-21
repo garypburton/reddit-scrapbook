@@ -1,3 +1,5 @@
+Searches = new Mongo.Collection("seaches");
+
 if (Meteor.isClient) {
 
   var example = "pics";
@@ -5,6 +7,7 @@ if (Meteor.isClient) {
 
   Template.body.events = {
     'submit .search': function(event){
+      
       event.preventDefault();
       // console.log(event)
       // Session.set("images", null);
@@ -34,12 +37,33 @@ if (Meteor.isClient) {
         // console.log(resultsArray);
         Session.set("images", resultsArray);
       });
+      var searchArray = Session.get("searches") || [];
+      searchArray.push(
+        subReddit
+      );
+      console.log(subReddit);
+      console.log(searchArray);
+      Session.set("searches", searchArray);
       event.target.sub.value = "";
+    },
+    'click #recentSearch': function(event){
+      event.preventDefault();
+      console.log(event);
+      var recent = event.target.text;
+      console.log(recent);
+      event.target.ownerDocument.forms[0][0].value = recent;
+      // event.target.ownerDocument.forms[0].submit();
     }
   }
 
   Template.body.helpers({
     example: example,
+  });
+
+  Template.searches.helpers({
+    searches: function(){
+      return Session.get("searches") || [];
+    }
   });
 
   Template.results.helpers({
