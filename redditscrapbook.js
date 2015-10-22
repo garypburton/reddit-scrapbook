@@ -67,6 +67,11 @@ if (Meteor.isClient) {
     example: example,
   });
 
+  Template.body.rendered = function(){
+    $('input[type=text]').focus();
+    console.log('I been rendered');
+  };
+
   Template.searches.helpers({
     searches: function(){
       return Session.get("searches") || [];
