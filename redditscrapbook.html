@@ -28,6 +28,9 @@
 </template>
 
 <template name="results">
+	{{#if noResults}}
+  		<div>{{noResults}}</div>
+  	{{/if}}
 	<ul id="resultsContainer" class="img-results">
 		{{#each images}}
 	  		{{>image}}

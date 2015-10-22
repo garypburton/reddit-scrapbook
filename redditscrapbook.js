@@ -11,6 +11,7 @@ if (Meteor.isClient) {
       event.preventDefault();
       // console.log(event)
       // Session.set("images", null);
+      Session.set("noResults", null);
       subReddit = event.target.sub.value;
       Meteor.call('fetchData', subReddit, function(err, response){
         if(err){
@@ -19,23 +20,29 @@ if (Meteor.isClient) {
           var resultsArray = [];
           var json = JSON.parse(response.content);
           var reddit = json.data.children;
-          for(var i = 0; i < reddit.length; i++) {
-            var obj = reddit[i];
-            var src = obj.data.url;
-            var img = new Image();
-            img.onload = function(src) { 
-              if(src.indexOf('.png') > 0 || src.indexOf('.jpg') > 0 || src.indexOf('.gif') > 0 && src.indexOf('.gifv') <= 0){
-                // console.log(img);
-                resultsArray.push(
-                  {url:src}
-                );
-              } 
-            }(src)
-            img.src = src;
-          }       
+          if(reddit.length > 0){
+            for(var i = 0; i < reddit.length; i++) {
+              var obj = reddit[i];
+              var src = obj.data.url;
+              var img = new Image();
+              img.onload = function(src) { 
+                if(src.indexOf('.png') > 0 || src.indexOf('.jpg') > 0 || src.indexOf('.gif') > 0 && src.indexOf('.gifv') <= 0){
+                  // console.log(img);
+                  resultsArray.push(
+                    {url:src}
+                  );
+                } 
+              }(src)
+              img.src = src;
+            } 
+            // console.log(resultsArray);
+            Session.set("images", resultsArray);
+          }else{
+            Session.set("images", null);
+            Session.set("noResults", "Nothing found");
+          }      
         }
-        // console.log(resultsArray);
-        Session.set("images", resultsArray);
+        
       });
       var searchArray = Session.get("searches") || [];
       searchArray.push(
@@ -69,6 +76,9 @@ if (Meteor.isClient) {
   Template.results.helpers({
     images: function(){
       return Session.get("images") || [];
+    },
+    noResults: function(){
+      return Session.get("noResults") || [];
     }
   });
 
@@ -82,7 +92,13 @@ if (Meteor.isServer) {
     fetchData: function(subReddit){
       var url = "http://reddit.com/r/" + subReddit + "/hot.json?limit=50";
       var response = HTTP.get(url, {timeout:30000});
-      return response;
+      if(response.statusCode == 200){
+        return response;
+      }else{
+        console.log("Response issue: ", response.statusCode);
+        var errorJson = JSON.parse(response.content);
+        throw new Meteor.Error(response.statusCode, errorJson.error);
+      }
     }
   });
 }
