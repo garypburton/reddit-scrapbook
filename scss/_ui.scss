@@ -1,0 +1,28 @@
+.search{
+	padding: 50px 50px 20px;
+	input{
+		display: block;
+		outline: none;
+		padding: 10px 20px;
+		width: 100%;
+		border-top: none;
+		border-right: none;
+		border-bottom: 5px solid #fc7e95;
+		border-left: none;
+		font-size: 50px;
+		text-align: center;
+	}
+}
+
+.ui-nav{
+	text-align: center;
+	li{
+		background: #fc7e95;
+	}
+	a{
+		display: block;
+		padding: 5px 10px;
+		text-decoration: none;
+		color: white;
+	}
+}
