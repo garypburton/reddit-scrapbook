@@ -1,9 +1,14 @@
 Searches = new Mongo.Collection("seaches");
+Images = new Mongo.Collection("images");
 
 if (Meteor.isClient) {
 
   var example = "pics";
   var subReddit = example;
+
+  Accounts.ui.config({
+    passwordSignupFields: "USERNAME_ONLY"
+  });
 
   Template.body.events = {
     'submit .search': function(event){
@@ -25,20 +30,24 @@ if (Meteor.isClient) {
               var obj = reddit[i];
               var src = obj.data.url;
               var img = new Image();
-              img.onload = function(src) { 
+              img.onload = function() { 
                 if(src.indexOf('.png') > 0 || src.indexOf('.jpg') > 0 || src.indexOf('.gif') > 0 && src.indexOf('.gifv') <= 0){
                   // console.log(img);
                   resultsArray.push(
-                    {url:src}
+                    src
                   );
                 } 
+                console.log('URL: '+src+' did work');
+              }(src)
+              img.onerror = function(){
+                console.log('URL: '+src+' did not work');
               }(src)
               img.src = src;
             } 
             // console.log(resultsArray);
-            Session.set("images", resultsArray);
+            Session.set("imageResults", resultsArray);
           }else{
-            Session.set("images", null);
+            Session.set("imageResults", null);
             Session.set("noResults", "Nothing found");
           }      
         }
@@ -52,16 +61,52 @@ if (Meteor.isClient) {
       console.log(searchArray);
       Session.set("searches", searchArray);
       event.target.sub.value = "";
-    },
-    'click #recentSearch': function(event){
+    } 
+  };
+
+  Template.search.events = {
+    'click .recent': function(event){
       event.preventDefault();
       console.log(event);
       var recent = event.target.text;
       console.log(recent);
       event.target.ownerDocument.forms[0][0].value = recent;
+      event.target.ownerDocument.forms[0][0].focus();
       // event.target.ownerDocument.forms[0].submit();
+    },
+  };
+
+  Template.image.events = {
+    'click .save': function(event){
+      event.preventDefault();
+      var url = event.target.parentNode.firstElementChild.currentSrc;
+      console.log(event);
+      Meteor.call("saveImg", url, function(error, result){
+        if(!error){
+          console.log(result);
+          $(event.target).fadeOut('slow');
+        }
+      });
+      // Meteor.call("saveImg", url);
+      // Meteor.call("setSaved", this._id, ! this.saved);
     }
-  }
+    // 'click .delete': function(event){
+    //   Meteor.call("deleteSaved", this._id);
+    //   Meteor.call("deleteSaved", this._id, function(error, result){
+    //     if(!error){
+    //       console.log(result);
+    //       $(event.target).fadeOut('slow', function(){
+    //         $(this).prev('.save').fadeIn('fast');
+    //       });
+    //     }
+    //   });
+    // }
+  };
+
+  // Handlebars.registerHelper('saved', function() {
+  //   savedID = Session.get('_id');
+  //   return Images.findOne( savedID );
+  // });
 
   Template.body.helpers({
     example: example,
@@ -79,8 +124,8 @@ if (Meteor.isClient) {
   });
 
   Template.results.helpers({
-    images: function(){
-      return Session.get("images") || [];
+    imageResults: function(){
+      return Session.get("imageResults") || [];
     },
     noResults: function(){
       return Session.get("noResults") || [];
@@ -88,6 +133,8 @@ if (Meteor.isClient) {
   });
 
 }
+
+
 
 if (Meteor.isServer) {
   Meteor.startup(function () {
@@ -104,6 +151,27 @@ if (Meteor.isServer) {
         var errorJson = JSON.parse(response.content);
         throw new Meteor.Error(response.statusCode, errorJson.error);
       }
+    },
+    saveImg: function (imgUrl) {
+      // Make sure the user is logged in before inserting a task
+      if (! Meteor.userId()) {
+        throw new Meteor.Error("not-authorized");
+      }
+
+      return Images.insert({
+        savedUrl: imgUrl,
+        createdAt: new Date(),
+        owner: Meteor.userId(),
+        username: Meteor.user().username
+      });
+    },
+    deleteSaved: function (taskId) {
+      Images.remove(taskId);
+    },
+    setSaved: function (taskId, setSaved) {
+      Images.update(taskId, { $set: { saved: setSaved} });
     }
   });
+
+    
 }

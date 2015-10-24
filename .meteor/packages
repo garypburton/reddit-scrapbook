@@ -11,3 +11,5 @@ http
 fourseven:scss
 mrt:jquery-imagesloaded
 sjors:meteor-masonry
+accounts-ui
+accounts-password

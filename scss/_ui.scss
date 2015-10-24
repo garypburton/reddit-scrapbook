@@ -1,5 +1,5 @@
 .search{
-	padding: 50px 50px 20px;
+	padding: 50px 50px 40px;
 	input{
 		display: block;
 		outline: none;
@@ -24,5 +24,18 @@
 		padding: 5px 10px;
 		text-decoration: none;
 		color: white;
+	}
+}
+
+.ui-btn{
+	padding: 10px 20px;
+	text-align: center;
+	color: white;
+	cursor: pointer;
+	&.save{
+		background: #96dcff;
+	}
+	&.delete{
+		background: #fc7e95;
 	}
 }

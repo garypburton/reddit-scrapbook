@@ -1,13 +1,22 @@
 .img-results{
-	padding: 20px 0 0;
+	padding: 40px 0 0;
 	width: 100%;
 	.img-result{
+		position: relative;
 		float:left;
 		width: 25%;
 		img{
 			display: block;
 			width: 100%;
 			height: auto;
+		}
+		.save, .delete{
+			position: absolute;
+			bottom: 0;
+			right: 0;
+		}
+		.delete{
+			display: none;
 		}
 	}
 }
