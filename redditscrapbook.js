@@ -22,30 +22,84 @@ if (Meteor.isClient) {
         if(err){
           window.alert("Error: " + err.reason);
         }else{
-          var resultsArray = [];
+          function imageExists(url, callback) {
+            var img = new Image();
+            img.onload = function() { callback(true); };
+            img.onerror = function() { callback(false); };
+            img.src = url;
+          }
+          var resultsArrayUn = [];
           var json = JSON.parse(response.content);
           var reddit = json.data.children;
           if(reddit.length > 0){
             for(var i = 0; i < reddit.length; i++) {
               var obj = reddit[i];
               var src = obj.data.url;
-              var img = new Image();
-              img.onload = function() { 
-                if(src.indexOf('.png') > 0 || src.indexOf('.jpg') > 0 || src.indexOf('.gif') > 0 && src.indexOf('.gifv') <= 0){
-                  // console.log(img);
-                  resultsArray.push(
-                    src
-                  );
-                } 
-                console.log('URL: '+src+' did work');
-              }(src)
-              img.onerror = function(){
-                console.log('URL: '+src+' did not work');
-              }(src)
-              img.src = src;
+              // var img = new Image();
+              // img.onload = function() { 
+              //   if(src.indexOf('.png') > 0 || src.indexOf('.jpg') > 0 || src.indexOf('.gif') > 0 && src.indexOf('.gifv') <= 0){
+              //     console.log(img);
+              //     resultsArray.push(
+              //       src
+              //     );
+              //   } 
+              //   console.log('URL: '+src+' did work');
+              // }(src);
+
+              // img.onerror = function(){
+              //   console.log('URL: '+src+' did not work');
+              // }(src);
+
+              // img.src = src;
+              resultsArrayUn.push(
+                src
+              );
             } 
-            // console.log(resultsArray);
-            Session.set("imageResults", resultsArray);
+            // console.log(resultsArrayUn);
+            function preloadimages(arr){
+              var newimages=[], loadedimages=0
+              var postaction=function(){}
+              var arr=(typeof arr!="object")? [arr] : arr
+              function imageloadpost(){
+                  loadedimages++
+                  if (loadedimages==arr.length){
+                      postaction(newimages) //call postaction and pass in newimages array as parameter
+                  }
+              }
+              for (var i=0; i<arr.length; i++){
+                  newimages[i]=new Image()
+                  newimages[i].src=arr[i]
+                  newimages[i].onload=function(){
+                      imageloadpost()
+                  }
+                  newimages[i].onerror=function(){
+                      imageloadpost()
+                  }
+              }
+              return { //return blank object with done() method
+                  done:function(f){
+                      postaction=f || postaction //remember user defined callback functions to be called when images load
+                  }
+              }
+            }
+            preloadimages(resultsArrayUn).done(function(images){
+              //call back codes, for example:
+              var resultsArray = [];
+              for(var i=0; i<images.length; i++){
+                var img = images[i];
+                // console.log(img);
+                // console.log(checkedUrl);
+                if(img.height > 0){
+                  resultsArray.push(
+                    img.src
+                  );
+                }
+              }
+              // console.log(resultsArray);
+              Session.set("imageResults", resultsArray);
+            });
+            
+            
           }else{
             Session.set("imageResults", null);
             Session.set("noResults", "Nothing found");
