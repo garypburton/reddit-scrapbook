@@ -1,6 +1,33 @@
 Searches = new Mongo.Collection("seaches");
 Images = new Mongo.Collection("images");
 
+function preloadimages(arr){
+  var newimages=[], loadedimages=0
+  var postaction=function(){}
+  var arr=(typeof arr!="object")? [arr] : arr
+  function imageloadpost(){
+      loadedimages++
+      if (loadedimages==arr.length){
+          postaction(newimages) //call postaction and pass in newimages array as parameter
+      }
+  }
+  for (var i=0; i<arr.length; i++){
+      newimages[i]=new Image()
+      newimages[i].src=arr[i]
+      newimages[i].onload=function(){
+          imageloadpost()
+      }
+      newimages[i].onerror=function(){
+          imageloadpost()
+      }
+  }
+  return { //return blank object with done() method
+      done:function(f){
+          postaction=f || postaction //remember user defined callback functions to be called when images load
+      }
+  }
+}
+
 if (Meteor.isClient) {
 
   var example = "pics";
@@ -12,22 +39,13 @@ if (Meteor.isClient) {
 
   Template.body.events = {
     'submit .search': function(event){
-      
       event.preventDefault();
-      // console.log(event)
-      // Session.set("images", null);
       Session.set("noResults", null);
       subReddit = event.target.sub.value;
       Meteor.call('fetchData', subReddit, function(err, response){
         if(err){
           window.alert("Error: " + err.reason);
         }else{
-          function imageExists(url, callback) {
-            var img = new Image();
-            img.onload = function() { callback(true); };
-            img.onerror = function() { callback(false); };
-            img.src = url;
-          }
           var resultsArrayUn = [];
           var json = JSON.parse(response.content);
           var reddit = json.data.children;
@@ -35,84 +53,36 @@ if (Meteor.isClient) {
             for(var i = 0; i < reddit.length; i++) {
               var obj = reddit[i];
               var src = obj.data.url;
-              // var img = new Image();
-              // img.onload = function() { 
-              //   if(src.indexOf('.png') > 0 || src.indexOf('.jpg') > 0 || src.indexOf('.gif') > 0 && src.indexOf('.gifv') <= 0){
-              //     console.log(img);
-              //     resultsArray.push(
-              //       src
-              //     );
-              //   } 
-              //   console.log('URL: '+src+' did work');
-              // }(src);
-
-              // img.onerror = function(){
-              //   console.log('URL: '+src+' did not work');
-              // }(src);
-
-              // img.src = src;
               resultsArrayUn.push(
                 src
               );
             } 
-            // console.log(resultsArrayUn);
-            function preloadimages(arr){
-              var newimages=[], loadedimages=0
-              var postaction=function(){}
-              var arr=(typeof arr!="object")? [arr] : arr
-              function imageloadpost(){
-                  loadedimages++
-                  if (loadedimages==arr.length){
-                      postaction(newimages) //call postaction and pass in newimages array as parameter
-                  }
-              }
-              for (var i=0; i<arr.length; i++){
-                  newimages[i]=new Image()
-                  newimages[i].src=arr[i]
-                  newimages[i].onload=function(){
-                      imageloadpost()
-                  }
-                  newimages[i].onerror=function(){
-                      imageloadpost()
-                  }
-              }
-              return { //return blank object with done() method
-                  done:function(f){
-                      postaction=f || postaction //remember user defined callback functions to be called when images load
-                  }
-              }
-            }
             preloadimages(resultsArrayUn).done(function(images){
-              //call back codes, for example:
               var resultsArray = [];
               for(var i=0; i<images.length; i++){
                 var img = images[i];
-                // console.log(img);
-                // console.log(checkedUrl);
                 if(img.height > 0){
                   resultsArray.push(
                     img.src
                   );
                 }
               }
-              // console.log(resultsArray);
               Session.set("imageResults", resultsArray);
-            });
-            
-            
+            });  
           }else{
             Session.set("imageResults", null);
             Session.set("noResults", "Nothing found");
           }      
-        }
-        
+        } 
       });
       var searchArray = Session.get("searches") || [];
-      searchArray.push(
-        subReddit
-      );
-      console.log(subReddit);
-      console.log(searchArray);
+      if(searchArray.indexOf(subReddit) === -1){
+        searchArray.push(
+          subReddit
+        );
+      }
+      // console.log(subReddit);
+      // console.log(searchArray);
       Session.set("searches", searchArray);
       event.target.sub.value = "";
     } 
